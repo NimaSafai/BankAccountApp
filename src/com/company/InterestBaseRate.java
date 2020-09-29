@@ -1,6 +1,6 @@
 package com.company;
 
-public interface interestBaseRate {
+public interface InterestBaseRate {
 
     default double getBaseRate() {
         return 4.5;

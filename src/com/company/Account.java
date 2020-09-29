@@ -1,6 +1,6 @@
 package com.company;
 
-public abstract class Account implements interestBaseRate {
+public abstract class Account implements InterestBaseRate {
     protected String name;
     protected String personnummer;
     protected double balance;

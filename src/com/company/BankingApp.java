@@ -178,7 +178,7 @@ public class BankingApp {
                     System.out.println("\nPlease enter the full directory path to the datafile you would like to upload (only .csv)");
                     String file = scan.nextLine();                         //Min exempelfil: "/Users/Nima/Desktop/NewBankAccounts.csv"
 
-                    ArrayList<String[]> newAccountHolders = (ArrayList<String[]>) csvReader.read(file);
+                    ArrayList<String[]> newAccountHolders = (ArrayList<String[]>) CsvReader.read(file);
                     for (String[] accountHolder : newAccountHolders) {
                         name = accountHolder[0];
                         personnummer = accountHolder[1];

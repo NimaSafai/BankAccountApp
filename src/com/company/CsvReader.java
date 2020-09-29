@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class csvReader {
+public class CsvReader {
 
     public static ArrayList<String[]> read(String file) {
         ArrayList<String[]> data = new ArrayList<>();
