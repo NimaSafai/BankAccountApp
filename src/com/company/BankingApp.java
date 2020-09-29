@@ -71,7 +71,7 @@ public class BankingApp {
                             name = scan.nextLine();
 
                             account = findAccountName(name);
-                            if (account != null && account.getName().equals(name)) {
+                            if (account != null) {
                                 account.showInfo();
                             } else {
                                 System.out.println("ERROR - Account not found");
@@ -83,7 +83,7 @@ public class BankingApp {
                             personnummer = scan.nextLine();
 
                             account = findAccountPN(personnummer);
-                            if (account != null && account.getPN().equals(personnummer)) {
+                            if (account != null) {
                                 account.showInfo();
                             } else {
                                 System.out.println("ERROR - Account not found");
@@ -95,7 +95,7 @@ public class BankingApp {
                             String accountNumber = scan.nextLine();
 
                             account = findAccountNumber(accountNumber);
-                            if (account != null && account.getAccountNumber().equals(accountNumber)) {
+                            if (account != null) {
                                 account.showInfo();
                             } else {
                                 System.out.println("ERROR - Account not found");
@@ -232,7 +232,7 @@ public class BankingApp {
 
     private Account findAccountName(String name) {
         for (Account account : accounts) {
-            if (account.getAccountNumber().equals(name)) {
+            if (account.getName().equals(name)) {
                 return account;
             }
         }
@@ -241,7 +241,7 @@ public class BankingApp {
 
     private Account findAccountPN(String personnummer) {
         for (Account account : accounts) {
-            if (account.getAccountNumber().equals(personnummer)) {
+            if (account.getPN().equals(personnummer)) {
                 return account;
             }
         }
