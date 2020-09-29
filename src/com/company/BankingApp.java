@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class BankingApp {
 
-    private  ArrayList<Account> accounts;
+    private ArrayList<Account> accounts;
 
     public void run() throws InterruptedException {
 
@@ -25,7 +25,7 @@ public class BankingApp {
             System.out.println("   0. Exit program");
 
             String menuChoice = scan.nextLine();
-            Account account = null;
+            Account account;
 
             switch (menuChoice) {
 
@@ -71,9 +71,11 @@ public class BankingApp {
                             name = scan.nextLine();
 
                             account = findAccountName(name);
-                            if (account.getName().equals(name)) {
+                            if (account != null && account.getName().equals(name)) {
                                 account.showInfo();
-                            } else { System.out.println("ERROR - Account not found"); }
+                            } else {
+                                System.out.println("ERROR - Account not found");
+                            }
                             break;
 
                         case "B":
@@ -81,9 +83,11 @@ public class BankingApp {
                             personnummer = scan.nextLine();
 
                             account = findAccountPN(personnummer);
-                            if (account.getPN().equals(personnummer)) {
+                            if (account != null && account.getPN().equals(personnummer)) {
                                 account.showInfo();
-                            } else { System.out.println("ERROR - Account not found"); }
+                            } else {
+                                System.out.println("ERROR - Account not found");
+                            }
                             break;
 
                         case "C":
@@ -91,9 +95,11 @@ public class BankingApp {
                             String accountNumber = scan.nextLine();
 
                             account = findAccountNumber(accountNumber);
-                            if (account.getAccountNumber().equals(accountNumber)) {
+                            if (account != null && account.getAccountNumber().equals(accountNumber)) {
                                 account.showInfo();
-                            } else { System.out.println("ERROR - Account not found"); }
+                            } else {
+                                System.out.println("ERROR - Account not found");
+                            }
                             break;
                     }
                     break;
@@ -108,13 +114,12 @@ public class BankingApp {
                     scan.nextLine();
 
                     account = findAccountNumber(accountNumber);
-                        if(account != null) {
-                            account.deposit(depositFunds);
-                            account.showInfo();
-                        }
-                        else {
-                            System.out.println("ERROR - Account not found");
-                        }
+                    if (account != null) {
+                        account.deposit(depositFunds);
+                        account.showInfo();
+                    } else {
+                        System.out.println("ERROR - Account not found");
+                    }
                     break;
 
                 //WITHDRAW
@@ -136,7 +141,9 @@ public class BankingApp {
                             Thread.sleep(1200);
                             System.out.println("\nYou do not have enough funds in your account. Please try again!");
                         }
-                    } else { System.out.println("ERROR - Account not found. Please try again!"); }
+                    } else {
+                        System.out.println("ERROR - Account not found. Please try again!");
+                    }
                     break;
 
 
@@ -146,7 +153,9 @@ public class BankingApp {
                     String fromAccount = scan.nextLine();
 
                     Account sendAccount = findAccountNumber(fromAccount);
-                    if(sendAccount == null) { System.out.println("ERROR - Account not found"); }
+                    if (sendAccount == null) {
+                        System.out.println("ERROR - Account not found");
+                    }
 
                     System.out.println("\nHow much would you like to transfer?");
                     double transferAmount = scan.nextInt();
@@ -156,21 +165,24 @@ public class BankingApp {
                     String toAccount = scan.nextLine();
 
                     Account receiveAccount = findAccountNumber(toAccount);
-                    if(receiveAccount == null) { System.out.println("ERROR - Account not found"); }
+                    if (receiveAccount == null) {
+                        System.out.println("ERROR - Account not found");
+                    }
 
-                    if(sendAccount != null && receiveAccount != null) {
+                    if (sendAccount != null && receiveAccount != null) {
                         sendAccount.withdraw(transferAmount);
                         receiveAccount.deposit(transferAmount);
-                    }
-                    System.out.println("\nCompleting transfer, please wait...");
-                    Thread.sleep(2000);
-                    System.out.println("\nThe transfer of $" + transferAmount + " from account number " + fromAccount + " to account number " + toAccount + " has now been completed!\n");
 
-                    System.out.println("\n*************************************");
-                    sendAccount.showInfo();
-                    System.out.println("*************************************");
-                    receiveAccount.showInfo();
-                    System.out.println("*************************************\n");
+                        System.out.println("\nCompleting transfer, please wait...");
+                        Thread.sleep(2000);
+                        System.out.println("\nThe transfer of $" + transferAmount + " from account number " + fromAccount + " to account number " + toAccount + " has now been completed!\n");
+
+                        System.out.println("\n*************************************");
+                        sendAccount.showInfo();
+                        System.out.println("*************************************");
+                        receiveAccount.showInfo();
+                        System.out.println("*************************************\n");
+                    }
                     break;
 
                 //READ CSV
@@ -178,7 +190,7 @@ public class BankingApp {
                     System.out.println("\nPlease enter the full directory path to the datafile you would like to upload (only .csv)");
                     String file = scan.nextLine();                         //Min exempelfil: "/Users/Nima/Desktop/NewBankAccounts.csv"
 
-                    ArrayList<String[]> newAccountHolders = (ArrayList<String[]>) CsvReader.read(file);
+                    ArrayList<String[]> newAccountHolders = CsvReader.read(file);
                     for (String[] accountHolder : newAccountHolders) {
                         name = accountHolder[0];
                         personnummer = accountHolder[1];
@@ -212,18 +224,27 @@ public class BankingApp {
     private Account findAccountNumber(String accountNumber) {
         for (Account account : accounts) {
             if (account.getAccountNumber().equals(accountNumber)) {
-                return account; }
-        } return null; }
+                return account;
+            }
+        }
+        return null;
+    }
 
     private Account findAccountName(String name) {
         for (Account account : accounts) {
             if (account.getAccountNumber().equals(name)) {
-                return account; }
-        } return null; }
+                return account;
+            }
+        }
+        return null;
+    }
 
     private Account findAccountPN(String personnummer) {
         for (Account account : accounts) {
             if (account.getAccountNumber().equals(personnummer)) {
-                return account; }
-        } return null; }
+                return account;
+            }
+        }
+        return null;
+    }
 }
