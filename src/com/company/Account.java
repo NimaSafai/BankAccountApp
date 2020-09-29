@@ -66,4 +66,5 @@ public abstract class Account implements InterestBaseRate {
                 "\nRATE: " + rate + "%"
                 );
     }
+    public abstract String toString();
 }

@@ -1,14 +1,21 @@
 package com.company;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
-public class CsvReader {
+public class CsvFileHandler {
+    /**
+     * Saves application data to file as CSV
+     * @param dataArrayList Array of strings to be written to file.
+     */
+    public static void saveFile(ArrayList<String> dataArrayList, String filePath) throws IOException {
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(filePath));
+        for (String dataString : dataArrayList) {
+            bufferedWriter.write(dataString);
+        }
+    }
 
-    public static ArrayList<String[]> read(String file) {
+    public static ArrayList<String[]> readFile(String file) {
         ArrayList<String[]> data = new ArrayList<>();
         String dataRow;
         try {

@@ -17,7 +17,7 @@ public class Savings extends Account {
         rate = getBaseRate() - .25;
     }
 
-        //Savings-konton får en deposit box med ett unikt ID och key
+    //Savings-konton får en deposit box med ett unikt ID och key
     private void setSafetyDepositBox() {
         safetyDepositBoxID = (int) (Math.random() * Math.pow(10, 3));
         safetyDepositBoxKey = (int) (Math.random() * Math.pow(10, 4));
@@ -27,8 +27,13 @@ public class Savings extends Account {
         super.showInfo();
         System.out.println(
                 "~~~ Your savings account features ~~~" +
-                "\n • Safety deposit box ID: " + safetyDepositBoxID +
-                "\n • Safety deposit box Key: " + safetyDepositBoxKey
-                );
+                        "\n • Safety deposit box ID: " + safetyDepositBoxID +
+                        "\n • Safety deposit box Key: " + safetyDepositBoxKey
+        );
+    }
+
+    @Override
+    public String toString() {
+        return String.join(",",this.name,this.personnummer,String.valueOf(this.balance),"Savings");
     }
 }

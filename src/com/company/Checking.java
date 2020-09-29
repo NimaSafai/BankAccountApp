@@ -30,4 +30,9 @@ public class Checking extends Account {
                 "\n • Debit card PIN: " + debitCardPIN
                 );
     }
+
+    @Override
+    public String toString() {
+        return String.join(",",this.name,this.personnummer,String.valueOf(this.balance),"Checking");
+    }
 }

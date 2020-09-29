@@ -1,7 +1,9 @@
 package com.company;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class BankingApp {
 
@@ -22,6 +24,7 @@ public class BankingApp {
             System.out.println("   4. Withdraw funds");
             System.out.println("   5. Transfer funds");
             System.out.println("   6. Add customer info from datafile (.csv)");
+            System.out.println("   7. Save customer info to datafile (.csv)");
             System.out.println("   0. Exit program");
 
             String menuChoice = scan.nextLine();
@@ -190,7 +193,7 @@ public class BankingApp {
                     System.out.println("\nPlease enter the full directory path to the datafile you would like to upload (only .csv)");
                     String file = scan.nextLine();                         //Min exempelfil: "/Users/Nima/Desktop/NewBankAccounts.csv"
 
-                    ArrayList<String[]> newAccountHolders = CsvReader.read(file);
+                    ArrayList<String[]> newAccountHolders = CsvFileHandler.readFile(file);
                     for (String[] accountHolder : newAccountHolders) {
                         name = accountHolder[0];
                         personnummer = accountHolder[1];
@@ -207,7 +210,19 @@ public class BankingApp {
                         System.out.println("\n**************\n");
                     }
                     break;
+                // SAVE CSV
+                case "7":
+                    System.out.println("\nPlease enter the full directory path to the save location");
+                    file = scan.nextLine(); //Min exempelfil: "/Users/Nima/Desktop/NewBankAccounts.csv"
 
+                    ArrayList<String> data = (ArrayList<String>) accounts.
+                            stream().map(Account::toString).collect(Collectors.toList());
+                    try {
+                        CsvFileHandler.saveFile(data, file);
+                    } catch (IOException e) {
+                        System.out.println("\nCould not write to file!");
+                    }
+                    break;
                 //EXIT
                 case "0":
                     System.out.println("\nThank you for using The Banking Program™. Goodbye!");
