@@ -158,6 +158,7 @@ public class BankingApp {
                     Account sendAccount = findAccountNumber(fromAccount);
                     if (sendAccount == null) {
                         System.out.println("ERROR - Account not found");
+                        break;
                     }
 
                     System.out.println("\nHow much would you like to transfer?");
@@ -170,9 +171,7 @@ public class BankingApp {
                     Account receiveAccount = findAccountNumber(toAccount);
                     if (receiveAccount == null) {
                         System.out.println("ERROR - Account not found");
-                    }
-
-                    if (sendAccount != null && receiveAccount != null) {
+                    } else {
                         sendAccount.withdraw(transferAmount);
                         receiveAccount.deposit(transferAmount);
 
