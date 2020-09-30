@@ -218,6 +218,7 @@ public class BankingApp {
                             stream().map(Account::toString).collect(Collectors.toList());
                     try {
                         CsvFileHandler.saveFile(data, file);
+                        System.out.println("\nCustomer info has successfully been saved.");
                     } catch (IOException e) {
                         System.out.println("\nCould not write to file!");
                     }
