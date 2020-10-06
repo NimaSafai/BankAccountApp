@@ -103,7 +103,14 @@ public class BankingApp {
                             String name = scan.nextLine().trim();
 
                             Account[] accountsArray = findAccountsByName(name);
-                            account = selectAccountFromArray(scan, accountsArray);
+                            if (accountsArray.length >= 1) {
+                                System.out.println(accountsArray.length + " accounts found for " + name);
+                                if (accountsArray.length == 1)
+                                    account = accountsArray[0];
+                                else
+                                    account = selectAccountFromArray(scan, accountsArray);
+                            } else
+                                System.out.println("No accounts found for " + name);
                             break;
 
                         case "B":
@@ -111,7 +118,14 @@ public class BankingApp {
                             String personnummer = scan.nextLine().trim();
 
                             accountsArray = findAccountsByPN(personnummer);
-                            account = selectAccountFromArray(scan, accountsArray);
+                            if (accountsArray.length >= 1) {
+                                System.out.println(accountsArray.length + " accounts found for " + personnummer);
+                                if (accountsArray.length == 1)
+                                    account = accountsArray[0];
+                                else
+                                    account = selectAccountFromArray(scan, accountsArray);
+                            } else
+                                System.out.println("No accounts found for " + personnummer);
                             break;
 
                         case "C":
@@ -326,21 +340,19 @@ public class BankingApp {
     /**
      * Shows a menu to select an account from an array of accounts.
      *
-     * @param scan       Scanner-object for input
-     * @param accountArr Account-array
+     * @param scan          Scanner-object for input
+     * @param accountsArray Account-array
      * @return Selected account or null
      */
-    private Account selectAccountFromArray(Scanner scan, Account[] accountArr) {
-        if (accountArr.length == 1)
-            return accountArr[0];
-        else if (accountArr.length > 1) {
+    private Account selectAccountFromArray(Scanner scan, Account[] accountsArray) {
+        if (accountsArray.length >= 1) {
             System.out.println("Select account: ");
-            for (int i = 0; i < accountArr.length; i++) {
-                System.out.printf("%d. %s%n", i + 1, accountArr[i].getAccountNumber());
+            for (int i = 0; i < accountsArray.length; i++) {
+                System.out.printf("%d. %s%n", i + 1, accountsArray[i].getAccountNumber());
             }
             String input = scan.nextLine();
             try {
-                return accountArr[Integer.parseInt(input)];
+                return accountsArray[Integer.parseInt(input) - 1];
             } catch (NumberFormatException ignored) {
             }
         }
