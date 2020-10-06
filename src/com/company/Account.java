@@ -1,45 +1,47 @@
 package com.company;
 
-public abstract class Account implements InterestBaseRate {
-    protected String name;
-    protected String personnummer;
-    protected double balance;
+public abstract class Account {
+    public static final double BASE_RATE = 4.5;                     //Jag bara satte 4.5% som ränta på måfå
+    private final Customer owner;
     private static int index = 10000;
-    protected String accountNumber;
-    protected double rate;
+    private double balance;
+    private String accountNumber;
 
     //ACCOUNT CONSTRUCTOR
-    public Account(String name, String personnummer, double initialDeposit) {
-        this.name = name;
-        this.personnummer = personnummer;
-        this.accountNumber = setAccountNumber();
+
+    public Account(Customer owner, double initialDeposit) {
+        this.owner = owner;
+        this.setAccountNumber(generateAccountNumber());
         balance = initialDeposit;
 
         index++;
-        setRate();
     }
-
     //GETTERS
+
     public String getAccountNumber() {
         return accountNumber;
     }
 
-    public String getName() {
-        return name;
+    public double getBalance() {
+        return balance;
     }
 
-    public String getPN() {
-        return personnummer;
+    public Customer getOwner() {
+        return this.owner;
     }
 
-    public double getBalance() { return balance; }
+    public abstract double getRate();
+
+    public abstract String getType();
 
     //SETTERS
-    public abstract void setRate();
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
 
-        //Varje konto får ett unikt account number baserat på det inskrivna personnumret, samt unikt ID och random nummer
-    public String setAccountNumber() {
-        String lastTwoOfPersonnummer = personnummer.substring(personnummer.length()-2);
+    //Varje konto får ett unikt account number baserat på det inskrivna personnumret, samt unikt ID och random nummer
+    public String generateAccountNumber() {
+        String lastTwoOfPersonnummer = owner.getPersonnummer().toString().substring(owner.getPersonnummer().toString().length() - 2);
         int uniqueID = index;
         int randomNumber = (int) (Math.random() * Math.pow(10, 3));
         return lastTwoOfPersonnummer + "-" + uniqueID + "-" + randomNumber;
@@ -60,11 +62,12 @@ public abstract class Account implements InterestBaseRate {
     //SHOW ACCOUNT INFO
     public void showInfo() {
         System.out.println(
-                "NAME: " + name +
-                "\nACCOUNT NUMBER: " + accountNumber +
-                "\nBALANCE: " + balance +
-                "\nRATE: " + rate + "%"
-                );
+                "ACCOUNT HOLDER: " + owner.getName() +
+                        "\nACCOUNT NUMBER: " + accountNumber +
+                        "\nBALANCE: " + balance +
+                        "\nRATE: " + this.getRate() + "%"
+        );
     }
+
     public abstract String toString();
 }

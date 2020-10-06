@@ -1,20 +1,26 @@
 package com.company;
 
 public class Savings extends Account {
+    public static final String ACCOUNT_TYPE = "SAVINGS";
     private int safetyDepositBoxID;
     private int safetyDepositBoxKey;
 
     //CONSTRUCTOR SAVINGS ACCOUNT
-    public Savings(String name, String personnummer, double initalDeposit) {
-        super(name, personnummer, initalDeposit);
+    public Savings(Customer owner, double initalDeposit) {
+        super(owner, initalDeposit);
         //Savings-konto identifieras med en 1:a i början av account number
-        accountNumber = "1-" + accountNumber;
+        this.setAccountNumber("1-" + this.getAccountNumber());
         setSafetyDepositBox();
     }
 
     @Override
-    public void setRate() {
-        rate = getBaseRate() - .25;
+    public double getRate() {
+        return Account.BASE_RATE - .25;
+    }
+
+    @Override
+    public String getType() {
+        return Savings.ACCOUNT_TYPE;
     }
 
     //Savings-konton får en deposit box med ett unikt ID och key
@@ -34,6 +40,10 @@ public class Savings extends Account {
 
     @Override
     public String toString() {
-        return String.join(",",this.name,this.personnummer,String.valueOf(this.balance),"Savings");
+        return String.join(",",
+                this.getOwner().getName(),
+                this.getOwner().getPersonnummer().toString(),
+                Checking.ACCOUNT_TYPE,
+                String.valueOf(this.getBalance()));
     }
 }

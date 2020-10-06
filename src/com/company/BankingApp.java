@@ -1,25 +1,30 @@
 package com.company;
 
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class BankingApp {
 
     private ArrayList<Account> accounts;
+    private HashSet<Customer> customers;
+    private Scanner scan;
 
     public void run() throws InterruptedException {
 
-        Scanner scan = new Scanner(System.in);
+        scan = new Scanner(System.in);
         boolean loop = true;
         accounts = new ArrayList<>();
+        customers = new HashSet<>();
 
         System.out.println("\n~~~~~ WELCOME TO THE BANKING PROGRAM™ ~~~~~");
         do {
             System.out.println("\nPLEASE SELECT FROM THE FOLLOWING CHOICES:");
             System.out.println("   1. Open a new account");
-            System.out.println("   2. See info for existing customer");
+            System.out.println("   2. See info for existing account");
             System.out.println("   3. Deposit funds");
             System.out.println("   4. Withdraw funds");
             System.out.println("   5. Transfer funds");
@@ -28,35 +33,59 @@ public class BankingApp {
             System.out.println("   0. Exit program");
 
             String menuChoice = scan.nextLine();
-            Account account;
+            Account account = null;
 
             switch (menuChoice) {
 
                 //OPEN ACCOUNT
                 case "1":
-                    System.out.println("Please enter the full name of the account holder: ");
-                    String name = scan.nextLine();
+                    Customer selectedCustomer = null;
+                    if (customers.size() == 0) {
+                        selectedCustomer = showCreateNewCustomerMenu();
+                    } else
+                        while (selectedCustomer == null) {
+                            System.out.println("Select an existing customer or add new:");
+                            System.out.println("1. Select existing customer");
+                            System.out.println("2. Add new customer");
 
-                    System.out.println("Please enter the personnummer (10 digits) of the account holder: ");
-                    String personnummer = scan.nextLine();
+                            String subMenuChoice = scan.nextLine();
+                            switch (subMenuChoice) {
+                                case "1":
+                                    selectedCustomer = showSelectCustomerMenu(scan);
+                                    break;
+                                case "2":
+                                    selectedCustomer = showCreateNewCustomerMenu();
+                                    break;
+                            }
+                            if (selectedCustomer == null)
+                                System.out.println("Could not find customer. Please select a customer.");
+                        }
 
                     System.out.println("Please enter your initial deposit:");
                     double initialDeposit = scan.nextDouble();
                     scan.nextLine();
 
-                    System.out.println("Please enter if you would like to open a Savings account or a Checking account: ");
-                    String accountType = scan.nextLine();
-                    if (accountType.equalsIgnoreCase("Savings")) {
-                        account = new Savings(name, personnummer, initialDeposit);
-                        System.out.println("A Savings account has successfully been created for " + name + ", " + personnummer + " and with the initial deposit of $" + initialDeposit + "\n");
-                        account.showInfo();
-                        accounts.add(account);
-                    } else if (accountType.equalsIgnoreCase("Checking")) {
-                        account = new Checking(name, personnummer, initialDeposit);
-                        System.out.println("\nA Checking account has successfully been created for " + name + ", " + personnummer + " and with the initial deposit of $" + initialDeposit + "0.\n");
-                        account.showInfo();
-                        accounts.add(account);
+                    while (account == null) {
+                        System.out.println("Please enter if you would like to open a "
+                                + Savings.ACCOUNT_TYPE.toLowerCase() + " account or a "
+                                + Checking.ACCOUNT_TYPE.toLowerCase() + " account: ");
+                        String accountType = scan.nextLine();
+
+                        if (accountType.equalsIgnoreCase(Savings.ACCOUNT_TYPE)) {
+                            account = new Savings(selectedCustomer, initialDeposit);
+                        } else if (accountType.equalsIgnoreCase(Checking.ACCOUNT_TYPE)) {
+                            account = new Checking(selectedCustomer, initialDeposit);
+                        }
                     }
+
+                    System.out.println("\nA " +
+                            account.getType().toLowerCase()
+                            + " account has successfully been created for " + selectedCustomer.getName() + ", "
+                            + selectedCustomer.getPersonnummer() + " and with the initial deposit of $"
+                            + initialDeposit + "\n");
+                    customers.add(selectedCustomer);
+                    accounts.add(account);
+                    account.showInfo();
                     break;
 
                 //SHOW INFO
@@ -71,26 +100,18 @@ public class BankingApp {
                     switch (infoChoice) {
                         case "A":
                             System.out.println("\nEnter the full name of the account holder: ");
-                            name = scan.nextLine();
+                            String name = scan.nextLine().trim();
 
-                            account = findAccountName(name);
-                            if (account != null) {
-                                account.showInfo();
-                            } else {
-                                System.out.println("ERROR - Account not found");
-                            }
+                            Account[] accountsArray = findAccountsByName(name);
+                            account = selectAccountFromArray(scan, accountsArray);
                             break;
 
                         case "B":
                             System.out.println("\nEnter the personnummer of the account holder: ");
-                            personnummer = scan.nextLine();
+                            String personnummer = scan.nextLine().trim();
 
-                            account = findAccountPN(personnummer);
-                            if (account != null) {
-                                account.showInfo();
-                            } else {
-                                System.out.println("ERROR - Account not found");
-                            }
+                            accountsArray = findAccountsByPN(personnummer);
+                            account = selectAccountFromArray(scan, accountsArray);
                             break;
 
                         case "C":
@@ -98,12 +119,13 @@ public class BankingApp {
                             String accountNumber = scan.nextLine();
 
                             account = findAccountNumber(accountNumber);
-                            if (account != null) {
-                                account.showInfo();
-                            } else {
-                                System.out.println("ERROR - Account not found");
-                            }
+
                             break;
+                    }
+                    if (account != null) {
+                        account.showInfo();
+                    } else {
+                        System.out.println("ERROR - Account not found");
                     }
                     break;
 
@@ -136,7 +158,7 @@ public class BankingApp {
 
                     account = findAccountNumber(accountNumber);
                     if (account != null) {
-                        if (withdrawFunds < account.balance) {
+                        if (withdrawFunds < account.getBalance()) {
                             account.withdraw(withdrawFunds);
                             System.out.println("Account number " + account.getAccountNumber() + " now has the balance $" + account.getBalance());
                         } else {
@@ -192,32 +214,21 @@ public class BankingApp {
                     System.out.println("\nPlease enter the full directory path to the datafile you would like to upload (only .csv)");
                     String file = scan.nextLine();                         //Min exempelfil: "/Users/Nima/Desktop/NewBankAccounts.csv"
 
-                    ArrayList<String[]> newAccountHolders = CsvFileHandler.readFile(file);
-                    for (String[] accountHolder : newAccountHolders) {
-                        name = accountHolder[0];
-                        personnummer = accountHolder[1];
-                        accountType = accountHolder[2];
-                        initialDeposit = Double.parseDouble(accountHolder[3]);
-                        if (accountType.equals("Savings")) {
-                            accounts.add(new Savings(name, personnummer, initialDeposit));
-                        } else if (accountType.equals("Checking")) {
-                            accounts.add(new Checking(name, personnummer, initialDeposit));
+                    accounts = CsvFileHandler.readFile(file);
+                    if (accounts != null)
+                        for (Account acc : accounts) {
+                            customers.add(acc.getOwner());
+                            acc.showInfo();
+                            System.out.println("\n**************\n");
                         }
-                    }
-                    for (Account acc : accounts) {
-                        acc.showInfo();
-                        System.out.println("\n**************\n");
-                    }
                     break;
                 // SAVE CSV
                 case "7":
                     System.out.println("\nPlease enter the full directory path to the save location");
                     file = scan.nextLine(); //Min exempelfil: "/Users/Nima/Desktop/NewBankAccounts.csv"
 
-                    ArrayList<String> data = (ArrayList<String>) accounts.
-                            stream().map(Account::toString).collect(Collectors.toList());
                     try {
-                        CsvFileHandler.saveFile(data, file);
+                        CsvFileHandler.saveFile(accounts, file);
                         System.out.println("\nCustomer info has successfully been saved.");
                     } catch (IOException e) {
                         System.out.println("\nCould not write to file!");
@@ -236,6 +247,106 @@ public class BankingApp {
         } while (loop);
     }
 
+    /**
+     * Shows a menu to select a specific Customer
+     *
+     * @param scan Scanner-object to use for input
+     * @return Customer-object if exists, otherwise null
+     */
+    private Customer showSelectCustomerMenu(Scanner scan) {
+        String menuChoice;
+        System.out.println("Select customer by name or personnummer");
+        System.out.println("1. Search customer by name");
+        System.out.println("2. Search customer by personnummer");
+        menuChoice = scan.nextLine();
+
+        Customer[] customerResults = null;
+        switch (menuChoice) {
+            case "1":
+                System.out.println("Enter customer name: ");
+                String input = scan.nextLine();
+                customerResults = getCustomersByName(input);
+                break;
+            case "2":
+                System.out.println("Enter customer personnummer: ");
+                input = scan.nextLine();
+                customerResults = getCustomersByPN(input);
+                break;
+        }
+        if (customerResults == null || customerResults.length == 0)
+            return null;
+        else if (customerResults.length == 1)
+            return customerResults[0];
+        else {
+            // Found multiple matching customers
+            System.out.println("Select a customer:");
+            for (int i = 0; i < customerResults.length; i++) {
+                Customer currentCustomer = customerResults[i];
+                System.out.printf("%d. %s%n", i + 1, currentCustomer.getName() + " (" + currentCustomer.getPersonnummer() + ")");
+            }
+            return customerResults[Integer.parseInt(scan.nextLine().trim()) - 1];
+        }
+    }
+
+    /**
+     * Get an array of customers with the matching personnumber
+     *
+     * @param input Personnummer-string
+     * @return Customer-array
+     */
+    private Customer[] getCustomersByPN(String input) {
+        String formatedInput = Customer.Personnummer.convertToPersonnummerFormat(input);
+        return customers.stream().filter(customer -> customer.getPersonnummer().toString().equals(formatedInput)).toArray(Customer[]::new);
+    }
+
+    /**
+     * Get an array of customers with the matching name
+     *
+     * @param input Name-string
+     * @return Customer-array
+     */
+    private Customer[] getCustomersByName(String input) {
+        return customers.stream().filter(customer -> customer.getName().toLowerCase().equals(input.toLowerCase())).toArray(Customer[]::new);
+    }
+
+    /**
+     * Menu to create a new customer
+     *
+     * @return The newly created Customer-object
+     */
+    private Customer showCreateNewCustomerMenu() {
+        System.out.println("Please enter the full name of the account holder: ");
+        String name = scan.nextLine();
+
+        System.out.println("Please enter the personnummer (10 digits) of the account holder: ");
+        String personnummer = Customer.Personnummer.convertToPersonnummerFormat(scan.nextLine());
+        return new Customer(name, personnummer);
+    }
+
+    /**
+     * Shows a menu to select an account from an array of accounts.
+     *
+     * @param scan       Scanner-object for input
+     * @param accountArr Account-array
+     * @return Selected account or null
+     */
+    private Account selectAccountFromArray(Scanner scan, Account[] accountArr) {
+        if (accountArr.length == 1)
+            return accountArr[0];
+        else if (accountArr.length > 1) {
+            System.out.println("Select account: ");
+            for (int i = 0; i < accountArr.length; i++) {
+                System.out.printf("%d. %s%n", i + 1, accountArr[i].getAccountNumber());
+            }
+            String input = scan.nextLine();
+            try {
+                return accountArr[Integer.parseInt(input)];
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return null;
+    }
+
     private Account findAccountNumber(String accountNumber) {
         for (Account account : accounts) {
             if (account.getAccountNumber().equals(accountNumber)) {
@@ -245,21 +356,72 @@ public class BankingApp {
         return null;
     }
 
-    private Account findAccountName(String name) {
-        for (Account account : accounts) {
-            if (account.getName().equals(name)) {
-                return account;
-            }
-        }
-        return null;
+    private Account[] findAccountsByName(String name) {
+        return accounts.stream().
+                filter(account -> account.getOwner().getName().equals(name)).
+                toArray(Account[]::new);
     }
 
-    private Account findAccountPN(String personnummer) {
-        for (Account account : accounts) {
-            if (account.getPN().equals(personnummer)) {
-                return account;
+    private Account[] findAccountsByPN(String personnummer) {
+        return accounts.stream().
+                filter(account -> account.getOwner().getPersonnummer().toString().equals(Customer.Personnummer.convertToPersonnummerFormat(personnummer))).
+                toArray(Account[]::new);
+    }
+
+    public static class CsvFileHandler {
+        /**
+         * Saves application data to file as CSV
+         *
+         * @param accountArrayList Array of accounts to be written to file.
+         */
+        public static void saveFile(ArrayList<Account> accountArrayList, String filePath) throws IOException {
+
+            ArrayList<String> dataArrayList = (ArrayList<String>) accountArrayList.
+                    stream().map(Account::toString).collect(Collectors.toList());
+
+            PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(filePath, StandardCharsets.UTF_8, false)), true);
+            for (String dataRow : dataArrayList) {
+                writer.println(dataRow);
             }
+            writer.flush();
+            writer.close();
         }
-        return null;
+
+        public static ArrayList<Account> readFile(String file) {
+            ArrayList<String> fileRows = new ArrayList<>();
+            String currentRow;
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8));
+                while ((currentRow = br.readLine()) != null) {
+                    fileRows.add(currentRow);
+                }
+            } catch (FileNotFoundException e) {
+                System.out.println("Could not find file!");
+                e.printStackTrace();
+                return null;
+            } catch (IOException e) {
+                System.out.println("Could not read file!");
+                e.printStackTrace();
+                return null;
+            }
+
+            ArrayList<Account> accountsToReturn = new ArrayList<>();
+            for (String row : fileRows) {
+                String[] dataArray = row.split(",");
+                String name = dataArray[0];
+                String personnummer = dataArray[1];
+                Customer loadedCustomer;
+                loadedCustomer = new Customer(name, personnummer);
+
+                String accountType = dataArray[2];
+                double initialDeposit = Double.parseDouble(dataArray[3]);
+                if (accountType.equals(Savings.ACCOUNT_TYPE)) {
+                    accountsToReturn.add(new Savings(loadedCustomer, initialDeposit));
+                } else if (accountType.equals(Checking.ACCOUNT_TYPE)) {
+                    accountsToReturn.add(new Checking(loadedCustomer, initialDeposit));
+                }
+            }
+            return accountsToReturn;
+        }
     }
 }
